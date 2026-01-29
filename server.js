@@ -106,10 +106,12 @@ app.get('/', (req, res) => {
       profile: '/auth/profile',
       logout: '/auth/logout',
       privacy: '/privacy-policy',
-      deleteAccount: '/delete-account'
+      deleteAccount: '/delete-account',
+      terms: '/terms-of-service'
     },
     privacyPolicy: '/privacy-policy',
-    deleteAccount: '/delete-account'
+    deleteAccount: '/delete-account',
+    termsOfService: '/terms-of-service'
   });
 });
 
@@ -121,6 +123,11 @@ app.get('/privacy-policy', (req, res) => {
 // Delete Account page route
 app.get('/delete-account', (req, res) => {
   res.sendFile(__dirname + '/public/delete-account.html');
+});
+
+// Terms of Service route
+app.get('/terms-of-service', (req, res) => {
+  res.sendFile(__dirname + '/public/terms-of-service.html');
 });
 
 // Google authentication routes
