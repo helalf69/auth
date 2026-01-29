@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Authentication Service</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        .last-updated {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+        }
+        h3 {
+            color: #34495e;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 15px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+        .contact-info {
+            background-color: #e8f4f8;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 30px;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            background-color: #2980b9;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Privacy Policy</h1>
+        <p class="last-updated">Last Updated: January 29, 2026</p>
+
+        <p>
+            This Privacy Policy describes how our Authentication Microservice ("we", "our", or "the service") 
+            collects, uses, and protects your personal information when you use our authentication services 
+            through third-party providers (Google, Facebook, and Microsoft).
+        </p>
+
+        <h2>1. Information We Collect</h2>
+        
+        <h3>1.1 Information Provided by OAuth Providers</h3>
+        <p>
+            When you authenticate using Google, Facebook, or Microsoft, we receive the following information 
+            from the respective provider:
+        </p>
+        <ul>
+            <li><strong>User ID:</strong> A unique identifier assigned by the OAuth provider</li>
+            <li><strong>Display Name:</strong> Your name as shown in your provider account</li>
+            <li><strong>Email Address:</strong> Your email address associated with the provider account</li>
+            <li><strong>Profile Photo:</strong> Your profile picture (if available from the provider)</li>
+            <li><strong>Provider Information:</strong> Which service you used to authenticate (Google, Facebook, or Microsoft)</li>
+        </ul>
+
+        <h3>1.2 Session Information</h3>
+        <p>
+            We create a session when you successfully authenticate. This session includes:
+        </p>
+        <ul>
+            <li>Session ID stored in an encrypted cookie</li>
+            <li>Your authentication status</li>
+            <li>Basic user profile information (as listed above)</li>
+        </ul>
+
+        <h3>1.3 Technical Information</h3>
+        <p>
+            We may automatically collect certain technical information, including:
+        </p>
+        <ul>
+            <li>IP address</li>
+            <li>Browser type and version</li>
+            <li>Device information</li>
+            <li>Access timestamps</li>
+        </ul>
+
+        <h2>2. How We Use Your Information</h2>
+        
+        <p>We use the collected information for the following purposes:</p>
+        <ul>
+            <li><strong>Authentication:</strong> To verify your identity and provide secure access to our services</li>
+            <li><strong>Session Management:</strong> To maintain your login session and remember your authentication status</li>
+            <li><strong>Service Improvement:</strong> To analyze usage patterns and improve our authentication service</li>
+            <li><strong>Security:</strong> To detect and prevent fraudulent activity, unauthorized access, and security threats</li>
+            <li><strong>Communication:</strong> To respond to your inquiries and provide customer support</li>
+        </ul>
+
+        <h2>3. Data Storage and Security</h2>
+        
+        <h3>3.1 Storage</h3>
+        <p>
+            Your authentication information is stored in server-side sessions. By default, session data is stored 
+            in memory. We do not permanently store your personal information unless you explicitly request it or 
+            it is necessary for the service to function.
+        </p>
+
+        <h3>3.2 Security Measures</h3>
+        <p>We implement various security measures to protect your information:</p>
+        <ul>
+            <li>Encrypted session cookies</li>
+            <li>Secure HTTPS connections (in production)</li>
+            <li>Regular security updates and patches</li>
+            <li>Secure session management practices</li>
+            <li>Access controls and authentication mechanisms</li>
+        </ul>
+
+        <div class="highlight">
+            <strong>Important:</strong> While we take reasonable measures to protect your information, no method 
+            of transmission over the internet or electronic storage is 100% secure. We cannot guarantee absolute 
+            security of your data.
+        </div>
+
+        <h2>4. Third-Party Services</h2>
+        
+        <p>
+            Our authentication service relies on third-party OAuth providers. When you authenticate, you are 
+            subject to their respective privacy policies:
+        </p>
+        <ul>
+            <li><strong>Google:</strong> <a href="https://policies.google.com/privacy" target="_blank">Google Privacy Policy</a></li>
+            <li><strong>Facebook:</strong> <a href="https://www.facebook.com/privacy/explanation" target="_blank">Facebook Data Policy</a></li>
+            <li><strong>Microsoft:</strong> <a href="https://privacy.microsoft.com/privacystatement" target="_blank">Microsoft Privacy Statement</a></li>
+        </ul>
+        <p>
+            We encourage you to review these policies to understand how these providers handle your information.
+        </p>
+
+        <h2>5. Cookies and Session Management</h2>
+        
+        <p>
+            We use session cookies to maintain your authentication state. These cookies:
+        </p>
+        <ul>
+            <li>Are essential for the authentication service to function</li>
+            <li>Are encrypted and secure</li>
+            <li>Expire when you log out or after a period of inactivity</li>
+            <li>Do not contain sensitive personal information</li>
+        </ul>
+        <p>
+            You can control cookies through your browser settings, but disabling cookies may prevent the 
+            authentication service from working properly.
+        </p>
+
+        <h2>6. Data Retention</h2>
+        
+        <p>
+            We retain your session information only for as long as necessary to provide the authentication 
+            service. Specifically:
+        </p>
+        <ul>
+            <li>Session data is deleted when you log out</li>
+            <li>Session data expires after a period of inactivity</li>
+            <li>We do not retain your information after your session ends unless required by law</li>
+        </ul>
+
+        <h2>7. Your Rights and Choices</h2>
+        
+        <p>You have the following rights regarding your personal information:</p>
+        <ul>
+            <li><strong>Access:</strong> You can request access to the personal information we hold about you</li>
+            <li><strong>Correction:</strong> You can request correction of inaccurate information</li>
+            <li><strong>Deletion:</strong> You can request deletion of your information by logging out</li>
+            <li><strong>Withdrawal:</strong> You can revoke access to your OAuth provider account at any time</li>
+            <li><strong>Opt-out:</strong> You can choose not to use our authentication service</li>
+        </ul>
+        <p>
+            To exercise these rights, please contact us using the information provided in the "Contact Us" 
+            section below.
+        </p>
+
+        <h2>8. Children's Privacy</h2>
+        
+        <p>
+            Our authentication service is not intended for children under the age of 13 (or the applicable 
+            age of consent in your jurisdiction). We do not knowingly collect personal information from 
+            children. If you believe we have collected information from a child, please contact us immediately.
+        </p>
+
+        <h2>9. International Data Transfers</h2>
+        
+        <p>
+            Your information may be transferred to and processed in countries other than your country of 
+            residence. These countries may have data protection laws that differ from those in your country. 
+            By using our service, you consent to the transfer of your information to these countries.
+        </p>
+
+        <h2>10. Changes to This Privacy Policy</h2>
+        
+        <p>
+            We may update this Privacy Policy from time to time. We will notify you of any changes by:
+        </p>
+        <ul>
+            <li>Updating the "Last Updated" date at the top of this policy</li>
+            <li>Posting a notice on our service (if applicable)</li>
+        </ul>
+        <p>
+            We encourage you to review this Privacy Policy periodically to stay informed about how we 
+            protect your information.
+        </p>
+
+        <h2>11. Compliance</h2>
+        
+        <p>
+            We strive to comply with applicable data protection laws, including:
+        </p>
+        <ul>
+            <li>General Data Protection Regulation (GDPR) for users in the European Union</li>
+            <li>California Consumer Privacy Act (CCPA) for users in California</li>
+            <li>Other applicable local data protection laws</li>
+        </ul>
+
+        <h2>12. Contact Us</h2>
+        
+        <div class="contact-info">
+            <p>If you have any questions, concerns, or requests regarding this Privacy Policy or our data 
+            practices, please contact us:</p>
+            <p>
+                <strong>Email:</strong> <a href="mailto:post@hhafell.no">post@hhafell.no</a><br>
+                <strong>Service Endpoint:</strong> <a href="/">Authentication Service</a>
+            </p>
+            <p>
+                We will respond to your inquiry within a reasonable timeframe.
+            </p>
+        </div>
+
+        <a href="/" class="back-link">← Back to Service</a>
+    </div>
+</body>
+</html>
