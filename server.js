@@ -105,15 +105,22 @@ app.get('/', (req, res) => {
       },
       profile: '/auth/profile',
       logout: '/auth/logout',
-      privacy: '/privacy-policy'
+      privacy: '/privacy-policy',
+      deleteAccount: '/delete-account'
     },
-    privacyPolicy: '/privacy-policy'
+    privacyPolicy: '/privacy-policy',
+    deleteAccount: '/delete-account'
   });
 });
 
 // Privacy Policy route
 app.get('/privacy-policy', (req, res) => {
   res.sendFile(__dirname + '/public/privacy-policy.html');
+});
+
+// Delete Account page route
+app.get('/delete-account', (req, res) => {
+  res.sendFile(__dirname + '/public/delete-account.html');
 });
 
 // Google authentication routes
@@ -202,6 +209,63 @@ app.get('/auth/failure', (req, res) => {
   res.status(401).json({
     success: false,
     message: 'Authentication failed'
+  });
+});
+
+// Delete account request endpoint
+app.post('/auth/delete-account', (req, res) => {
+  const { email, provider, reason } = req.body;
+
+  // Validate required fields
+  if (!email || !provider) {
+    return res.status(400).json({
+      success: false,
+      message: 'Email and provider are required fields'
+    });
+  }
+
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid email address format'
+    });
+  }
+
+  // Log the deletion request (in production, you would store this in a database)
+  console.log('=== ACCOUNT DELETION REQUEST ===');
+  console.log(`Email: ${email}`);
+  console.log(`Provider: ${provider}`);
+  console.log(`Reason: ${reason || 'Not provided'}`);
+  console.log(`Timestamp: ${new Date().toISOString()}`);
+  console.log(`IP Address: ${req.ip || req.connection.remoteAddress}`);
+  console.log('================================');
+
+  // If user is currently authenticated, destroy their session
+  if (req.isAuthenticated() && req.user) {
+    // Check if the email matches the authenticated user
+    if (req.user.email && req.user.email.toLowerCase() === email.toLowerCase()) {
+      req.logout((err) => {
+        if (err) {
+          console.error('Error logging out user during deletion:', err);
+        }
+      });
+    }
+  }
+
+  // In a production environment with a database, you would:
+  // 1. Find the user by email and provider
+  // 2. Delete all associated data
+  // 3. Log the deletion for audit purposes
+  // 4. Send a confirmation email to the user
+  
+  // For now, we acknowledge the request
+  res.json({
+    success: true,
+    message: 'Your deletion request has been received and will be processed within 30 days as required by data protection regulations.',
+    requestId: `DEL-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    timestamp: new Date().toISOString()
   });
 });
 

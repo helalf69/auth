@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Account - Authentication Service</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #e74c3c;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        .warning-box {
+            background-color: #fee;
+            border-left: 4px solid #e74c3c;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .warning-box strong {
+            color: #c0392b;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        p {
+            margin-bottom: 15px;
+        }
+        ul {
+            margin-left: 30px;
+            margin-bottom: 15px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .info-box {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        form {
+            margin-top: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+        }
+        input[type="email"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+        input[type="email"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .checkbox-group {
+            margin: 20px 0;
+        }
+        .checkbox-group label {
+            display: flex;
+            align-items: flex-start;
+            font-weight: normal;
+            cursor: pointer;
+        }
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 10px;
+            margin-top: 4px;
+            cursor: pointer;
+        }
+        button {
+            background-color: #e74c3c;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #c0392b;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .success-message {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            color: #155724;
+            display: none;
+        }
+        .error-message {
+            background-color: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            color: #721c24;
+            display: none;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            background-color: #2980b9;
+            text-decoration: none;
+        }
+        .links {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        .links a {
+            color: #3498db;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Delete Account / Remove Data</h1>
+
+        <div class="warning-box">
+            <strong>⚠️ Warning:</strong> This action cannot be undone. Once your data is deleted, 
+            you will need to authenticate again if you wish to use the service in the future.
+        </div>
+
+        <h2>What Will Be Deleted?</h2>
+        <p>When you request account deletion, the following information will be permanently removed:</p>
+        <ul>
+            <li>Your user profile information (name, email, profile photo)</li>
+            <li>Your authentication session data</li>
+            <li>Any stored preferences or settings</li>
+            <li>All associated account data</li>
+        </ul>
+
+        <div class="info-box">
+            <strong>Note:</strong> If you are currently logged in, you can also use the 
+            <a href="/auth/logout">logout</a> endpoint to immediately end your session. 
+            However, to permanently delete all stored data, please submit a deletion request below.
+        </div>
+
+        <h2>Request Data Deletion</h2>
+        <p>To request deletion of your account and associated data, please fill out the form below:</p>
+
+        <form id="deletionForm">
+            <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    required 
+                    placeholder="Enter the email address associated with your account"
+                >
+                <small style="color: #666; display: block; margin-top: 5px;">
+                    This should match the email address you used when authenticating.
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label for="provider">Authentication Provider *</label>
+                <select id="provider" name="provider" required style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 4px; font-size: 1em;">
+                    <option value="">Select the provider you used to login</option>
+                    <option value="google">Google</option>
+                    <option value="facebook">Facebook</option>
+                    <option value="microsoft">Microsoft</option>
+                    <option value="unknown">I don't remember</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="reason">Reason for Deletion (Optional)</label>
+                <textarea 
+                    id="reason" 
+                    name="reason" 
+                    placeholder="Please let us know why you're deleting your account (optional, but helps us improve our service)"
+                ></textarea>
+            </div>
+
+            <div class="checkbox-group">
+                <label>
+                    <input type="checkbox" id="confirm" name="confirm" required>
+                    <span>
+                        I understand that this action is permanent and cannot be undone. 
+                        I confirm that I want to delete my account and all associated data.
+                    </span>
+                </label>
+            </div>
+
+            <div class="success-message" id="successMessage">
+                <strong>✓ Success!</strong> Your deletion request has been submitted. 
+                We will process your request within 30 days as required by data protection regulations.
+            </div>
+
+            <div class="error-message" id="errorMessage">
+                <strong>✗ Error:</strong> <span id="errorText"></span>
+            </div>
+
+            <button type="submit" id="submitBtn">Submit Deletion Request</button>
+        </form>
+
+        <div class="links">
+            <a href="/">← Back to Service</a>
+            <a href="/privacy-policy">Privacy Policy</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('deletionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            
+            // Hide previous messages
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+            
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            
+            const formData = {
+                email: document.getElementById('email').value,
+                provider: document.getElementById('provider').value,
+                reason: document.getElementById('reason').value
+            };
+            
+            try {
+                const response = await fetch('/auth/delete-account', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    successMessage.style.display = 'block';
+                    document.getElementById('deletionForm').reset();
+                    // Scroll to success message
+                    successMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    errorText.textContent = data.message || 'An error occurred. Please try again.';
+                    errorMessage.style.display = 'block';
+                    errorMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            } catch (error) {
+                errorText.textContent = 'Network error. Please check your connection and try again.';
+                errorMessage.style.display = 'block';
+                errorMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Deletion Request';
+            }
+        });
+    </script>
+</body>
+</html>
