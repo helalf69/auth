@@ -1,4 +1,26 @@
-require('dotenv').config();
+// Load environment variables
+// Try .env first, then fallback to ,env (in case of file naming issues)
+const path = require('path');
+const fs = require('fs');
+
+const envPath = path.join(__dirname, '.env');
+const altEnvPath = path.join(__dirname, ',env');
+
+let envFile = '.env';
+if (fs.existsSync(envPath)) {
+  require('dotenv').config({ path: envPath });
+  console.log('✓ Loaded .env file');
+} else if (fs.existsSync(altEnvPath)) {
+  require('dotenv').config({ path: altEnvPath });
+  console.log('✓ Loaded ,env file (consider renaming to .env)');
+  envFile = ',env';
+} else {
+  require('dotenv').config(); // Try default location
+  console.warn('⚠ Warning: No .env file found. Using default dotenv behavior.');
+  console.warn('  Checked:', envPath);
+  console.warn('  Checked:', altEnvPath);
+}
+
 const express = require('express');
 const session = require('express-session');
 const passport = require('passport');
@@ -11,6 +33,13 @@ const RememberToken = require('./models/RememberToken');
 
 const app = express();
 const PORT = 3030;
+
+// Debug: Show which OAuth providers are configured (without showing secrets)
+console.log('\nOAuth Configuration Status:');
+console.log('  Google:', process.env.GOOGLE_CLIENT_ID ? '✓ Configured' : '✗ Not configured');
+console.log('  Facebook:', process.env.FACEBOOK_APP_ID ? '✓ Configured' : '✗ Not configured');
+console.log('  Microsoft:', process.env.MICROSOFT_CLIENT_ID ? '✓ Configured' : '✗ Not configured');
+console.log('');
 
 // Connect to MariaDB and initialize tables
 (async () => {
@@ -58,58 +87,76 @@ passport.deserializeUser((user, done) => {
   done(null, user);
 });
 
+// OAuth Strategy Configuration
+// Only initialize strategies if credentials are provided
+
 // Google OAuth Strategy
-passport.use(new GoogleStrategy({
-  clientID: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: "/auth/google/callback"
-}, (accessToken, refreshToken, profile, done) => {
-  // This function is called after successful Google authentication
-  const user = {
-    id: profile.id,
-    provider: 'google',
-    name: profile.displayName,
-    email: profile.emails[0].value,
-    photo: profile.photos[0].value
-  };
-  return done(null, user);
-}));
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: "/auth/google/callback"
+  }, (accessToken, refreshToken, profile, done) => {
+    // This function is called after successful Google authentication
+    const user = {
+      id: profile.id,
+      provider: 'google',
+      name: profile.displayName,
+      email: profile.emails[0].value,
+      photo: profile.photos[0].value
+    };
+    return done(null, user);
+  }));
+  console.log('Google OAuth strategy configured');
+} else {
+  console.warn('Warning: Google OAuth credentials not found. Google login will not be available.');
+}
 
 // Facebook OAuth Strategy
-passport.use(new FacebookStrategy({
-  clientID: process.env.FACEBOOK_APP_ID,
-  clientSecret: process.env.FACEBOOK_APP_SECRET,
-  callbackURL: "/auth/facebook/callback",
-  profileFields: ['id', 'displayName', 'email', 'picture.type(large)']
-}, (accessToken, refreshToken, profile, done) => {
-  // This function is called after successful Facebook authentication
-  const user = {
-    id: profile.id,
-    provider: 'facebook',
-    name: profile.displayName,
-    email: profile.emails ? profile.emails[0].value : null,
-    photo: profile.photos ? profile.photos[0].value : null
-  };
-  return done(null, user);
-}));
+if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
+  passport.use(new FacebookStrategy({
+    clientID: process.env.FACEBOOK_APP_ID,
+    clientSecret: process.env.FACEBOOK_APP_SECRET,
+    callbackURL: "/auth/facebook/callback",
+    profileFields: ['id', 'displayName', 'email', 'picture.type(large)']
+  }, (accessToken, refreshToken, profile, done) => {
+    // This function is called after successful Facebook authentication
+    const user = {
+      id: profile.id,
+      provider: 'facebook',
+      name: profile.displayName,
+      email: profile.emails ? profile.emails[0].value : null,
+      photo: profile.photos ? profile.photos[0].value : null
+    };
+    return done(null, user);
+  }));
+  console.log('Facebook OAuth strategy configured');
+} else {
+  console.warn('Warning: Facebook OAuth credentials not found. Facebook login will not be available.');
+}
 
 // Microsoft OAuth Strategy
-passport.use(new MicrosoftStrategy({
-  clientID: process.env.MICROSOFT_CLIENT_ID,
-  clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
-  callbackURL: "/auth/microsoft/callback",
-  tenant: 'common' // Use 'common' for multi-tenant, or specific tenant ID
-}, (accessToken, refreshToken, profile, done) => {
-  // This function is called after successful Microsoft authentication
-  const user = {
-    id: profile.id,
-    provider: 'microsoft',
-    name: profile.displayName,
-    email: profile.emails ? profile.emails[0].value : null,
-    photo: null // Microsoft profile may not include photo
-  };
-  return done(null, user);
-}));
+if (process.env.MICROSOFT_CLIENT_ID && process.env.MICROSOFT_CLIENT_SECRET) {
+  passport.use(new MicrosoftStrategy({
+    clientID: process.env.MICROSOFT_CLIENT_ID,
+    clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
+    callbackURL: "/auth/microsoft/callback",
+    tenant: 'common' // Use 'common' for multi-tenant, or specific tenant ID
+  }, (accessToken, refreshToken, profile, done) => {
+    // This function is called after successful Microsoft authentication
+    const user = {
+      id: profile.id,
+      provider: 'microsoft',
+      name: profile.displayName,
+      email: profile.emails ? profile.emails[0].value : null,
+      photo: null // Microsoft profile may not include photo
+    };
+    return done(null, user);
+  }));
+  console.log('Microsoft OAuth strategy configured');
+} else {
+  console.warn('Warning: Microsoft OAuth credentials not found. Microsoft login will not be available.');
+}
 
 // Routes
 
@@ -160,6 +207,12 @@ app.get('/terms-of-service', (req, res) => {
 // Google authentication routes
 app.get('/auth/google',
   (req, res, next) => {
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+      return res.status(503).json({
+        success: false,
+        message: 'Google OAuth is not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env'
+      });
+    }
     // Store remember me preference in session
     req.session.rememberMe = req.query.remember === 'true';
     next();
@@ -210,6 +263,12 @@ app.get('/auth/google/callback',
 // Facebook authentication routes
 app.get('/auth/facebook',
   (req, res, next) => {
+    if (!process.env.FACEBOOK_APP_ID || !process.env.FACEBOOK_APP_SECRET) {
+      return res.status(503).json({
+        success: false,
+        message: 'Facebook OAuth is not configured. Please set FACEBOOK_APP_ID and FACEBOOK_APP_SECRET in .env'
+      });
+    }
     req.session.rememberMe = req.query.remember === 'true';
     next();
   },
@@ -257,6 +316,12 @@ app.get('/auth/facebook/callback',
 // Microsoft authentication routes
 app.get('/auth/microsoft',
   (req, res, next) => {
+    if (!process.env.MICROSOFT_CLIENT_ID || !process.env.MICROSOFT_CLIENT_SECRET) {
+      return res.status(503).json({
+        success: false,
+        message: 'Microsoft OAuth is not configured. Please set MICROSOFT_CLIENT_ID and MICROSOFT_CLIENT_SECRET in .env'
+      });
+    }
     req.session.rememberMe = req.query.remember === 'true';
     next();
   },
