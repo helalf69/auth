@@ -2,12 +2,29 @@ require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const passport = require('passport');
+const cookieParser = require('cookie-parser');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
 const MicrosoftStrategy = require('passport-microsoft').Strategy;
+const db = require('./config/database');
+const RememberToken = require('./models/RememberToken');
 
 const app = express();
 const PORT = 3030;
+
+// Connect to MariaDB and initialize tables
+(async () => {
+  const connected = await db.testConnection();
+  if (connected) {
+    try {
+      await RememberToken.initializeTable();
+    } catch (error) {
+      console.error('Error initializing database tables:', error);
+    }
+  } else {
+    console.log('Continuing without database (remember me feature will not work)');
+  }
+})();
 
 // Session configuration
 app.use(session({
@@ -20,6 +37,9 @@ app.use(session({
 // Initialize Passport
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Cookie parser middleware
+app.use(cookieParser());
 
 // Serve static files from public directory
 app.use(express.static('public'));
@@ -107,12 +127,19 @@ app.get('/', (req, res) => {
       logout: '/auth/logout',
       privacy: '/privacy-policy',
       deleteAccount: '/delete-account',
-      terms: '/terms-of-service'
+      terms: '/terms-of-service',
+      iframe: '/login'
     },
     privacyPolicy: '/privacy-policy',
     deleteAccount: '/delete-account',
-    termsOfService: '/terms-of-service'
+    termsOfService: '/terms-of-service',
+    iframeLogin: '/login'
   });
+});
+
+// Iframe login page route
+app.get('/login', (req, res) => {
+  res.sendFile(__dirname + '/public/login.html');
 });
 
 // Privacy Policy route
@@ -132,40 +159,107 @@ app.get('/terms-of-service', (req, res) => {
 
 // Google authentication routes
 app.get('/auth/google',
+  (req, res, next) => {
+    // Store remember me preference in session
+    req.session.rememberMe = req.query.remember === 'true';
+    next();
+  },
   passport.authenticate('google', { scope: ['profile', 'email'] })
 );
 
 app.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/auth/failure' }),
-  (req, res) => {
-    // Successful authentication
-    res.json({
-      success: true,
-      message: 'Google authentication successful',
-      user: req.user
-    });
+  async (req, res) => {
+    try {
+      const rememberMe = req.session.rememberMe || false;
+      
+      if (rememberMe) {
+        const token = await RememberToken.createToken(req.user);
+        // Set cookie for 30 days
+        res.cookie('remember_token', token, {
+          maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax'
+        });
+      }
+
+      // Redirect to login page for iframe, or return JSON for API
+      if (req.headers.accept && req.headers.accept.includes('text/html')) {
+        res.redirect('/login?success=true');
+      } else {
+        res.json({
+          success: true,
+          message: 'Google authentication successful',
+          user: req.user,
+          rememberMe: rememberMe
+        });
+      }
+    } catch (error) {
+      console.error('Error creating remember token:', error);
+      res.json({
+        success: true,
+        message: 'Google authentication successful',
+        user: req.user,
+        rememberMe: false
+      });
+    }
   }
 );
 
 // Facebook authentication routes
 app.get('/auth/facebook',
+  (req, res, next) => {
+    req.session.rememberMe = req.query.remember === 'true';
+    next();
+  },
   passport.authenticate('facebook', { scope: ['email'] })
 );
 
 app.get('/auth/facebook/callback',
   passport.authenticate('facebook', { failureRedirect: '/auth/failure' }),
-  (req, res) => {
-    // Successful authentication
-    res.json({
-      success: true,
-      message: 'Facebook authentication successful',
-      user: req.user
-    });
+  async (req, res) => {
+    try {
+      const rememberMe = req.session.rememberMe || false;
+      
+      if (rememberMe) {
+        const token = await RememberToken.createToken(req.user);
+        res.cookie('remember_token', token, {
+          maxAge: 30 * 24 * 60 * 60 * 1000,
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax'
+        });
+      }
+
+      if (req.headers.accept && req.headers.accept.includes('text/html')) {
+        res.redirect('/login?success=true');
+      } else {
+        res.json({
+          success: true,
+          message: 'Facebook authentication successful',
+          user: req.user,
+          rememberMe: rememberMe
+        });
+      }
+    } catch (error) {
+      console.error('Error creating remember token:', error);
+      res.json({
+        success: true,
+        message: 'Facebook authentication successful',
+        user: req.user,
+        rememberMe: false
+      });
+    }
   }
 );
 
 // Microsoft authentication routes
 app.get('/auth/microsoft',
+  (req, res, next) => {
+    req.session.rememberMe = req.query.remember === 'true';
+    next();
+  },
   passport.authenticate('microsoft', {
     scope: ['user.read']
   })
@@ -173,13 +267,39 @@ app.get('/auth/microsoft',
 
 app.get('/auth/microsoft/callback',
   passport.authenticate('microsoft', { failureRedirect: '/auth/failure' }),
-  (req, res) => {
-    // Successful authentication
-    res.json({
-      success: true,
-      message: 'Microsoft authentication successful',
-      user: req.user
-    });
+  async (req, res) => {
+    try {
+      const rememberMe = req.session.rememberMe || false;
+      
+      if (rememberMe) {
+        const token = await RememberToken.createToken(req.user);
+        res.cookie('remember_token', token, {
+          maxAge: 30 * 24 * 60 * 60 * 1000,
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax'
+        });
+      }
+
+      if (req.headers.accept && req.headers.accept.includes('text/html')) {
+        res.redirect('/login?success=true');
+      } else {
+        res.json({
+          success: true,
+          message: 'Microsoft authentication successful',
+          user: req.user,
+          rememberMe: rememberMe
+        });
+      }
+    } catch (error) {
+      console.error('Error creating remember token:', error);
+      res.json({
+        success: true,
+        message: 'Microsoft authentication successful',
+        user: req.user,
+        rememberMe: false
+      });
+    }
   }
 );
 
@@ -199,7 +319,18 @@ app.get('/auth/profile', (req, res) => {
 });
 
 // Logout route
-app.get('/auth/logout', (req, res) => {
+app.get('/auth/logout', async (req, res) => {
+  // Delete remember token if exists
+  const rememberToken = req.cookies.remember_token;
+  if (rememberToken) {
+    try {
+      await RememberToken.deleteToken(rememberToken);
+      res.clearCookie('remember_token');
+    } catch (error) {
+      console.error('Error deleting remember token:', error);
+    }
+  }
+
   req.logout((err) => {
     if (err) {
       return res.status(500).json({ error: 'Logout failed' });
@@ -217,6 +348,71 @@ app.get('/auth/failure', (req, res) => {
     success: false,
     message: 'Authentication failed'
   });
+});
+
+// Remember token check endpoint
+app.post('/auth/remember-check', async (req, res) => {
+  try {
+    const { token } = req.body;
+    
+    if (!token) {
+      return res.status(400).json({
+        authenticated: false,
+        message: 'Token is required'
+      });
+    }
+
+    const user = await RememberToken.validateToken(token);
+    
+    if (user) {
+      // Create session for the user
+      req.login(user, (err) => {
+        if (err) {
+          return res.status(500).json({
+            authenticated: false,
+            message: 'Error creating session'
+          });
+        }
+        res.json({
+          authenticated: true,
+          user: user
+        });
+      });
+    } else {
+      res.status(401).json({
+        authenticated: false,
+        message: 'Invalid or expired token'
+      });
+    }
+  } catch (error) {
+    console.error('Remember token check error:', error);
+    res.status(500).json({
+      authenticated: false,
+      message: 'Error validating token'
+    });
+  }
+});
+
+// Remember token delete endpoint
+app.post('/auth/remember-delete', async (req, res) => {
+  try {
+    const { token } = req.body;
+    
+    if (token) {
+      await RememberToken.deleteToken(token);
+    }
+    
+    res.json({
+      success: true,
+      message: 'Token deleted'
+    });
+  } catch (error) {
+    console.error('Remember token delete error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting token'
+    });
+  }
 });
 
 // Delete account request endpoint
@@ -277,7 +473,24 @@ app.post('/auth/delete-account', (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Authentication microservice running on port ${PORT}`);
   console.log(`Visit http://localhost:${PORT} to see available endpoints`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+  console.log('SIGTERM signal received: closing HTTP server and database connections');
+  server.close(async () => {
+    await db.closePool();
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', async () => {
+  console.log('SIGINT signal received: closing HTTP server and database connections');
+  server.close(async () => {
+    await db.closePool();
+    process.exit(0);
+  });
 });

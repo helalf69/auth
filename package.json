@@ -8,9 +8,11 @@
     "dev": "node server.js"
   },
   "dependencies": {
+    "cookie-parser": "^1.4.6",
     "dotenv": "^16.6.1",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
+    "mariadb": "^3.2.2",
     "passport": "^0.7.0",
     "passport-facebook": "^3.0.0",
     "passport-google-oauth20": "^2.0.0",

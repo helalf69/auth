@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Authentication Service</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 0.95em;
+        }
+        .provider-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .provider-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            color: #333;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .provider-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        .provider-btn:active {
+            transform: translateY(0);
+        }
+        .provider-btn.google {
+            border-color: #4285f4;
+        }
+        .provider-btn.google:hover {
+            background: #e8f0fe;
+            border-color: #4285f4;
+        }
+        .provider-btn.facebook {
+            border-color: #1877f2;
+        }
+        .provider-btn.facebook:hover {
+            background: #e7f3ff;
+            border-color: #1877f2;
+        }
+        .provider-btn.microsoft {
+            border-color: #00a4ef;
+        }
+        .provider-btn.microsoft:hover {
+            background: #e6f7ff;
+            border-color: #00a4ef;
+        }
+        .provider-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+        }
+        .remember-me {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            gap: 8px;
+        }
+        .remember-me input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        .remember-me label {
+            color: #555;
+            font-size: 0.9em;
+            cursor: pointer;
+            user-select: none;
+        }
+        .links {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .links a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.85em;
+            transition: color 0.3s;
+        }
+        .links a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+        .loading {
+            display: none;
+            color: #667eea;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+        .error-message {
+            display: none;
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+        .user-info {
+            display: none;
+            padding: 20px;
+            background: #f0f7ff;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .user-info.active {
+            display: block;
+        }
+        .user-info img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+        .user-info h3 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .user-info p {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        .logout-btn {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.3s;
+        }
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Sign In</h1>
+        <p class="subtitle">Choose your preferred login method</p>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="user-info" id="userInfo">
+            <img id="userPhoto" src="" alt="User Photo" style="display: none;">
+            <h3 id="userName"></h3>
+            <p id="userEmail"></p>
+            <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
+        </div>
+
+        <div id="loginSection">
+            <div class="provider-buttons">
+                <a href="#" class="provider-btn google" onclick="handleLogin('google'); return false;">
+                    <svg class="provider-icon" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Continue with Google
+                </a>
+                <a href="#" class="provider-btn facebook" onclick="handleLogin('facebook'); return false;">
+                    <svg class="provider-icon" viewBox="0 0 24 24" fill="#1877F2">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                    Continue with Facebook
+                </a>
+                <a href="#" class="provider-btn microsoft" onclick="handleLogin('microsoft'); return false;">
+                    <svg class="provider-icon" viewBox="0 0 24 24">
+                        <path fill="#f25022" d="M1 1h10v10H1z"/>
+                        <path fill="#00a4ef" d="M13 1h10v10H13z"/>
+                        <path fill="#7fba00" d="M1 13h10v10H1z"/>
+                        <path fill="#ffb900" d="M13 13h10v10H13z"/>
+                    </svg>
+                    Continue with Microsoft
+                </a>
+            </div>
+
+            <div class="remember-me">
+                <input type="checkbox" id="rememberMe" checked>
+                <label for="rememberMe">Remember me for 30 days</label>
+            </div>
+
+            <div class="links">
+                <a href="/privacy-policy" target="_blank">Privacy Policy</a>
+                <a href="/terms-of-service" target="_blank">Terms of Service</a>
+                <a href="/delete-account" target="_blank">Delete Account</a>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">Authenticating...</div>
+    </div>
+
+    <script>
+        // Check if user is already authenticated or has remember token
+        async function checkAuthStatus() {
+            try {
+                // First check session
+                const sessionResponse = await fetch('/auth/profile');
+                if (sessionResponse.ok) {
+                    const data = await sessionResponse.json();
+                    if (data.authenticated) {
+                        showUserInfo(data.user);
+                        return;
+                    }
+                }
+
+                // Check remember token from cookie
+                const rememberToken = getCookie('remember_token');
+                if (rememberToken) {
+                    const tokenResponse = await fetch('/auth/remember-check', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ token: rememberToken })
+                    });
+
+                    if (tokenResponse.ok) {
+                        const tokenData = await tokenResponse.json();
+                        if (tokenData.authenticated) {
+                            showUserInfo(tokenData.user);
+                            // Create session
+                            await fetch('/auth/profile');
+                        }
+                    } else {
+                        // Invalid token, remove cookie
+                        deleteCookie('remember_token');
+                    }
+                }
+            } catch (error) {
+                console.error('Auth check error:', error);
+            }
+        }
+
+        function handleLogin(provider) {
+            const rememberMe = document.getElementById('rememberMe').checked;
+            const url = `/auth/${provider}?remember=${rememberMe ? 'true' : 'false'}`;
+            window.location.href = url;
+        }
+
+        async function handleLogout() {
+            try {
+                // Delete remember token
+                const rememberToken = getCookie('remember_token');
+                if (rememberToken) {
+                    await fetch('/auth/remember-delete', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ token: rememberToken })
+                    });
+                    deleteCookie('remember_token');
+                }
+
+                // Logout session
+                await fetch('/auth/logout');
+                
+                // Reload page
+                location.reload();
+            } catch (error) {
+                console.error('Logout error:', error);
+                location.reload();
+            }
+        }
+
+        function showUserInfo(user) {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('userInfo').classList.add('active');
+            document.getElementById('userName').textContent = user.name || 'User';
+            document.getElementById('userEmail').textContent = user.email || '';
+            
+            if (user.photo) {
+                const photoImg = document.getElementById('userPhoto');
+                photoImg.src = user.photo;
+                photoImg.style.display = 'block';
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        function deleteCookie(name) {
+            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        }
+
+        // Check auth status on page load
+        checkAuthStatus();
+
+        // Listen for messages from parent window (if embedded in iframe)
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'checkAuth') {
+                checkAuthStatus().then(() => {
+                    window.parent.postMessage({ type: 'authStatus', authenticated: document.getElementById('userInfo').classList.contains('active') }, '*');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
