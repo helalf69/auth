@@ -17,7 +17,8 @@ MICROSOFT_CLIENT_ID=your-microsoft-client-id
 MICROSOFT_CLIENT_SECRET=your-microsoft-client-secret
 
 # Database Credentials
-DB_HOST=129.151.192.11
+DB_HOST=localhost
+# 129.151.192.11
 DB_PORT=3306
 DB_USER=authuser
 DB_PASS=STERKT_PASSORD
