@@ -5,21 +5,62 @@ const fs = require('fs');
 
 const envPath = path.join(__dirname, '.env');
 const altEnvPath = path.join(__dirname, ',env');
+const altEnvPath2 = path.join(process.cwd(), '.env'); // Also check current working directory
 
-let envFile = '.env';
+let envFile = null;
+let envLoaded = false;
+
 if (fs.existsSync(envPath)) {
-  require('dotenv').config({ path: envPath });
-  console.log('✓ Loaded .env file');
-} else if (fs.existsSync(altEnvPath)) {
-  require('dotenv').config({ path: altEnvPath });
-  console.log('✓ Loaded ,env file (consider renaming to .env)');
-  envFile = ',env';
-} else {
-  require('dotenv').config(); // Try default location
-  console.warn('⚠ Warning: No .env file found. Using default dotenv behavior.');
-  console.warn('  Checked:', envPath);
-  console.warn('  Checked:', altEnvPath);
+  const result = require('dotenv').config({ path: envPath });
+  if (!result.error) {
+    console.log('✓ Loaded .env file from:', envPath);
+    envFile = '.env';
+    envLoaded = true;
+  }
 }
+
+if (!envLoaded && fs.existsSync(altEnvPath)) {
+  const result = require('dotenv').config({ path: altEnvPath });
+  if (!result.error) {
+    console.log('✓ Loaded ,env file from:', altEnvPath);
+    console.log('  ⚠ Consider renaming ,env to .env for standard practice');
+    envFile = ',env';
+    envLoaded = true;
+  }
+}
+
+if (!envLoaded && fs.existsSync(altEnvPath2) && altEnvPath2 !== envPath) {
+  const result = require('dotenv').config({ path: altEnvPath2 });
+  if (!result.error) {
+    console.log('✓ Loaded .env file from:', altEnvPath2);
+    envFile = altEnvPath2;
+    envLoaded = true;
+  }
+}
+
+if (!envLoaded) {
+  // Try default location as last resort
+  const result = require('dotenv').config();
+  if (result.error) {
+    console.warn('⚠ Warning: Could not load .env file');
+    console.warn('  Checked:', envPath);
+    console.warn('  Checked:', altEnvPath);
+    console.warn('  Checked:', altEnvPath2);
+    console.warn('  Error:', result.error.message);
+  } else {
+    console.log('✓ Loaded .env from default location');
+    envLoaded = true;
+  }
+}
+
+// Verify critical environment variables are loaded
+console.log('\nEnvironment Variables Check:');
+console.log('  DB_HOST:', process.env.DB_HOST || '(not set - will use localhost)');
+console.log('  DB_PORT:', process.env.DB_PORT || '(not set - will use 3306)');
+console.log('  DB_USER:', process.env.DB_USER || '(not set - will use authuser)');
+console.log('  DB_NAME:', process.env.DB_NAME || '(not set - will use authdb)');
+console.log('  DB_PASS:', process.env.DB_PASS ? '***' : '(not set - will use empty)');
+console.log('');
 
 const express = require('express');
 const session = require('express-session');
